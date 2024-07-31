@@ -79,5 +79,5 @@ if __name__ == '__main__':
     app.run(host='127.0.0.1', debug=False, ssl_context=context)
         
 
-# curl -X POST -H "Content-Type: application/json" -d '{"message": "Buttery"}'-k https://127.0.0.1:5000/webhook
+# curl -X POST -H "Content-Type: application/json" -d '{"message": "Buttery"}' -k https://127.0.0.1:5000/webhook
 
