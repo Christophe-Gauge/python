@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 from flask import Flask, request, jsonify
 import os
 import logging
@@ -5,6 +8,11 @@ import json
 import ssl
 from OpenSSL import crypto
 # pip3 install pyOpenSSL
+
+"""
+A sample Flask application with an auto-generated self-signed certificate
+that will log POST requests to /webhook JSON payload to a file.
+"""
 
 app = Flask(__name__)
 context = ssl.SSLContext()
@@ -19,14 +27,12 @@ logging.getLogger().addHandler(console)
 
 
 def cert_gen(
+    global context
     serialNumber=0,
     validityStartInSeconds=0,
     validityEndInSeconds=10*365*24*60*60,
     KEY_FILE = "private.key",
     CERT_FILE="selfsigned.crt"):
-    global context
-    #can look at generated file using openssl:
-    #openssl x509 -inform pem -in selfsigned.crt -noout -text
     # create a key pair
     k = crypto.PKey()
     k.generate_key(crypto.TYPE_RSA, 4096)
