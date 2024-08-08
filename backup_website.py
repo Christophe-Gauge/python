@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 import mimetypes
 
 '''
-The S3 bucket name should have the same name as the live website if you want it to be a failover site, just change the DNS record.
+See https://technotes.videre.us/en/python/backup-a-website-to-s3/ for documentation.
 '''
 
 # Load .env file
