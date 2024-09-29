@@ -15,7 +15,7 @@ that will log POST requests to /webhook JSON payload to a file.
 """
 
 app = Flask(__name__)
-context = ssl.SSLContext()
+context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 
 logFile = os.path.realpath(__file__).split('.')[0] + ".log"
 logging.basicConfig(filename=logFile, format='%(asctime)s %(levelname)-5s %(message)s', level=logging.DEBUG)
@@ -27,12 +27,12 @@ logging.getLogger().addHandler(console)
 
 
 def cert_gen(
-    global context
     serialNumber=0,
     validityStartInSeconds=0,
     validityEndInSeconds=10*365*24*60*60,
     KEY_FILE = "private.key",
     CERT_FILE="selfsigned.crt"):
+    global context
     # create a key pair
     k = crypto.PKey()
     k.generate_key(crypto.TYPE_RSA, 4096)
