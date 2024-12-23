@@ -1,0 +1,15 @@
+[Unit]
+Description=Run custom alerts for Suricata
+After=network.target auditd.service
+
+[Service]
+User=pi
+Group=pi
+Type=simple
+ExecStart=/home/pi/alert.py >> /home/pi/alert.txt
+KillMode=process
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+Alias=alert.service
