@@ -1,0 +1,10 @@
+...
+outputs:
+  - eve-log:
+      enabled: yes
+      filetype: unix_stream
+      filename: /tmp/suricata_eve.sock
+      types:
+        - alert:
+            enabled: yes
+...
