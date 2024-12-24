@@ -38,10 +38,9 @@ def sendSlack(title, attachments, severity):
     data = {
             "username": slack_user,
             "icon_emoji": slack_icon,
-            "text": f'{title}{alert}', #'New device on network <!channel|channel>',
+            "text": f'{title}{alert}',
             "attachments": [
                 {
-                    # "fallback": title,
                     "color": color,
                     "text": f'```{attachments}```'
                 }
@@ -76,10 +75,7 @@ except OSError:
         raise
 
 sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-#sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 try:
-    #sock = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) # Use SOCK_STREAM for TCP
-    #sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind(socket_path)
 except socket.error as msg:
     print (msg)
@@ -93,7 +89,7 @@ while True:
     try:
         data = client_socket.recv(7168)
         if not data:
-            continue #break  # Connection closed by client
+            continue
         print(f"Received: {data.decode()}")
 
         if data:
