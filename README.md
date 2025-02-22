@@ -5,4 +5,5 @@
 ![versions](https://img.shields.io/pypi/pyversions/pybadges.svg)
 
 
-A collection of random Python scripts
+A collection of random Python scripts. For additional details, see:
+https://technotes.videre.us/en/python/
