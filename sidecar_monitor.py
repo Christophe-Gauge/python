@@ -7,6 +7,7 @@ from __future__ import (absolute_import, division,
 #
 # Copyright (C) 2025 Christophe Gauge
 # https://github.com/Christophe-Gauge/python/blob/main/sidecar_monitor.py
+# https://technotes.videre.us/en/python/building-a-python-sidecar-to-monitor-server-performance/
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
