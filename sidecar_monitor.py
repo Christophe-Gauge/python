@@ -44,7 +44,8 @@ For all hosts:
     - Monitor processes using large amounts of Memory
     - Report issues in Slack channel #cloud-ops (max 30 per day)
     - Log the memory used by this script (DEBUG logging only)
-    - Monitor that required Docker containers are running
+    - Monitor that the required Docker containers are running
+    - Monitor a given log file for errors
 
 '''
 
@@ -53,6 +54,7 @@ For all hosts:
 
 
 import os
+import io
 import sys
 import logging
 from logging.handlers import RotatingFileHandler
@@ -95,6 +97,9 @@ net_error_threshold = 20000
 process_memory_threshold = 2 * 1024 * 1024 * 1024  # 2 GB
 
 required_containers = ['container-1', 'container-2']
+log_file_to_monitor = "/home/user1/job_output/run.log"
+log_file_last_line = 0
+log_file_number_of_reads = 0
 
 MAX_LOG_LINES = 50
 MAX_LOG_CHARS = int(4000 * .98)  # slack messages can have at most 4000 chars
@@ -224,7 +229,7 @@ def sendSlack(myText, myColor="#ff0000"):
     logger.info('Slack - %s - %s - %s' % (slack_system_notifications_count, slack_docker_notifications_count, myText))
 
     worker = Thread(target=sendSlackThread(myText, myColor, service_tier,))
-    worker.setDaemon(True)
+    worker.daemon = True
     worker.start()
 
 
@@ -463,6 +468,41 @@ def resetSlackCount():
     slack_docker_notifications_count = 0
     slack_system_notifications_count = 0
 
+@time_this
+def monitorLogFile():
+    """Monitors a log file for new errors"""
+    global log_file_to_monitor, log_file_last_line, log_file_number_of_reads
+    logger.info(f'Run {log_file_number_of_reads} - Checking file {log_file_to_monitor} offset {log_file_last_line}')
+    error_lines = ''
+    try:
+        with open(log_file_to_monitor, 'r') as file:
+            file.seek(log_file_last_line)
+            lines = file.readlines()
+            if lines:
+                number_of_new_lines = 0
+                for line in lines:
+                    number_of_new_lines += 1
+                    # Don't alert if this is the first time we read the file
+                    if log_file_number_of_reads > 1:
+                        if 'error' in line.lower():
+                            logger.info(line.strip())
+                            error_lines += line
+                logger.info(f"Processed {number_of_new_lines} new lines, new offset is {log_file_last_line}")
+            else:
+                logger.info("No new lines")
+            # Readjust pointer in case the file was rotated and the pointer is too large
+            file.seek(io.SEEK_SET, io.SEEK_END)
+            log_file_last_line = file.tell()
+    except FileNotFoundError:
+       logger.error(f"Error: File not found at {log_file_to_monitor}")
+    except Exception as e:
+         logger.error(f"An error occurred: {e}")
+    log_file_number_of_reads += 1
+    if error_lines != "":
+        alertText = f"Errors in log {log_file_to_monitor}:\n{error_lines}"
+        logger.warning(alertText)
+        sendSlack(alertText)
+      
 
 def main():
     """Main function."""
@@ -488,11 +528,12 @@ def main():
     # schedule.every(4).to(6).hours.do(run_threaded, Check_Network_Drops)
     schedule.every(1).to(2).hours.do(run_threaded, Check_CPU_Usage)
     schedule.every(24).hours.do(resetSlackCount)
+    schedule.every(1).hours.do(monitorLogFile)
 
     client = docker.DockerClient(base_url='unix://var/run/docker.sock')
 
     worker = Thread(target=watch_and_notify_events, args=(client,))
-    worker.setDaemon(True)
+    worker.daemon = True
     worker.start()
     logger.info('Thread started!')
 
